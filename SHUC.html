@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世新合唱團 | 活潑有力的歌聲</title>
+    <!-- 載入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 1. 設置網頁名稱 (Title) -->
+    <!-- 請在這裡修改您想顯示在分頁上的網站名稱 -->
+    <title>世新合唱團
+    </title>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 2. 設置分頁圖示 (Favicon) -->
+    <!-- href 連結指向您的圖示檔案位置。推薦使用 .ico 或 .png 格式。 -->
+    <!-- 範例：使用一個線上的彩虹圖示 -->
+    <link rel="icon" type="image/png" href="ass/img/2.ico"> 
+    
+    <!-- 使用 Inter 和 Noto Sans TC 作為主要字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Noto+Sans+TC:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        /* 設定網頁預設字體 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f7f9fb;
+        }
+        /* 平滑捲動 */
+        html {
+            scroll-behavior: smooth;
+        }
+        /* 定義 Tailwind 客製化顏色 */
+        .text-shsu-blue { color: #0C87D0; }
+        .bg-shsu-blue { background-color: #0C87D0; }
+        .text-shsu-orange { color: #F3990E; }
+        .bg-shsu-orange { background-color: #F3990E; }
+        .bg-shsu-blue-light { background-color: #36a0e6; }
+        .border-shsu-orange { border-color: #F3990E; }
+        .focus\:ring-shsu-orange\/50:focus { --tw-ring-color: rgba(243, 153, 14, 0.5); }
+        .hover\:bg-shsu-blue-light:hover { background-color: #36a0e6; }
+        
+        /* 隱藏 Chrome/Safari 的捲軸，但保留滾動功能 (針對 Activities 區塊) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+    <script>
+        // 設定 Tailwind CSS 客製化顏色
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'shsu-blue': '#0C87D0', // RGB(12, 135, 208)
+                        'shsu-orange': '#F3990E', // RGB(243, 153, 14)
+                        'shsu-blue-light': '#36a0e6',
+                    },
+                }
+            }
+        }
+        // JavaScript for mobile menu toggle
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // JavaScript for smooth scrolling
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const target = this.getAttribute('href');
+                    e.preventDefault(); 
+                    
+                    if (target && target.length > 1) { 
+                        try {
+                            document.querySelector(target).scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        } catch (error) {
+                            console.error("Scroll target not found or selector invalid:", target, error);
+                        }
+                    }
+
+                    const menu = document.getElementById('mobile-menu');
+                    if (menu && !menu.classList.contains('hidden')) {
+                        toggleMenu();
+                    }
+                });
+            });
+        });
+
+        // JavaScript for Activities Carousel Scrolling
+        function scrollCarousel(direction) {
+            const carousel = document.getElementById('activities-carousel');
+            // 滾動單位：卡片寬度 (w-80) + 間距 (gap-8) = 320px + 32px = 352px
+            const scrollDistance = 352; 
+            carousel.scrollBy({
+                left: direction * scrollDistance,
+                behavior: 'smooth'
+            });
+        }
+        
+        /*
+         * 圖片懸停輪播邏輯 (Hover Slideshow Logic)
+         */
+        let slideshowTimers = {};
+        const NUM_IMAGES = 6; // 每張卡片要輪播的圖片數量
+        // ★★★★★ 調整圖片輪播速度 (單位：毫秒) ★★★★★
+        const SLIDESHOW_INTERVAL = 1250; // 輪播間隔時間 (1500ms = 1.5秒)
+
+        function startSlideshow(cardId) {
+            // 確保停止任何已在運行的計時器
+            stopSlideshow(cardId); 
+
+            // 抓取圖片元素
+            const images = [];
+            for (let i = 0; i < NUM_IMAGES; i++) {
+                const img = document.getElementById(`img-${cardId}-${i}`);
+                if (img) images.push(img);
+            }
+            if (images.length === 0) return;
+            
+            // 初始化：確保第一張圖片可見
+            images.forEach((img, index) => {
+                img.classList.remove('opacity-100', 'z-10');
+                img.classList.add('opacity-0');
+            });
+            images[0].classList.remove('opacity-0');
+            images[0].classList.add('opacity-100', 'z-10');
+            
+            let currentIndex = 0;
+
+            // 啟動輪播計時器
+            const timer = setInterval(() => {
+                // 隱藏目前圖片並降級 z-index
+                images[currentIndex].classList.remove('opacity-100', 'z-10');
+                images[currentIndex].classList.add('opacity-0');
+
+                // 計算下一張圖片索引
+                currentIndex = (currentIndex + 1) % images.length;
+
+                // 顯示下一張圖片並升級 z-index
+                images[currentIndex].classList.remove('opacity-0');
+                images[currentIndex].classList.add('opacity-100', 'z-10');
+
+            }, SLIDESHOW_INTERVAL); // 這裡使用 SLIDESHOW_INTERVAL
+
+            slideshowTimers[cardId] = timer;
+        }
+
+        function stopSlideshow(cardId) {
+            // 停止計時器
+            if (slideshowTimers[cardId]) {
+                clearInterval(slideshowTimers[cardId]);
+                delete slideshowTimers[cardId];
+            }
+            
+            // 重設所有圖片狀態：只顯示第一張，其餘隱藏
+            for (let i = 0; i < NUM_IMAGES; i++) {
+                const img = document.getElementById(`img-${cardId}-${i}`);
+                if (img) {
+                    img.classList.remove('z-10'); // 移除 z-index
+                    if (i === 0) {
+                        img.classList.remove('opacity-0');
+                        img.classList.add('opacity-100', 'z-10'); // 第一張預設顯示
+                    } else {
+                        img.classList.remove('opacity-100');
+                        img.classList.add('opacity-0');
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-800">
+
+    <!-- 1. 導覽列 (Navigation Bar) - 黏在頂部，包含 Logo 和所有連結 -->
+    <header class="sticky top-0 z-50 bg-white shadow-lg">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo/Title - 縮寫已更新為 SHUC -->
+                <a href="#hero" class="text-2xl font-extrabold text-shsu-blue tracking-wider">
+                    世新合唱團 <span class="text-shsu-orange">SHUC</span>
+                </a>
+
+                <!-- Desktop Menu: 連結文字已更新為 "About us" -->
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="#about" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-shsu-blue-light hover:text-shsu-blue-light text-sm font-medium transition duration-150 ease-in-out">About us</a>
+                    <a href="#activities" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-shsu-blue-light hover:text-shsu-blue-light text-sm font-medium transition duration-150 ease-in-out">活動</a>
+                    <a href="#journal" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-shsu-blue-light hover:text-shsu-blue-light text-sm font-medium transition duration-150 ease-in-out">團刊</a>
+                    <a href="#fundraising" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-shsu-blue-light hover:text-shsu-blue-light text-sm font-medium transition duration-150 ease-in-out">募資計劃</a>
+                    <a href="#merchandise" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-shsu-blue-light hover:text-shsu-blue-light text-sm font-medium transition duration-150 ease-in-out">周邊</a>
+                    <a href="#contact" class="text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 border-transparent hover:border-shsu-blue-light hover:text-shsu-blue-light text-sm font-medium transition duration-150 ease-in-out">聯絡我們</a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <div class="-mr-2 flex items-center sm:hidden">
+                    <button type="button" onclick="toggleMenu()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-shsu-blue-light transition duration-150 ease-in-out" aria-expanded="false">
+                        <!-- Icon (Menu open/close) -->
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Menu (Hidden by default) - 連結文字已更新為 "About us" -->
+        <div class="sm:hidden hidden" id="mobile-menu">
+            <div class="pt-2 pb-3 space-y-1 px-4 border-t border-gray-100">
+                <a href="#about" class="block pl-3 pr-4 py-2 border-l-4 border-shsu-blue text-base font-medium text-shsu-blue bg-shsu-blue/10 rounded-md">About us</a>
+                <a href="#activities" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-700 hover:text-shsu-blue hover:bg-shsu-blue/5 rounded-md">活動</a>
+                <a href="#journal" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-700 hover:text-shsu-blue hover:bg-shsu-blue/5 rounded-md">團刊</a>
+                <a href="#fundraising" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-700 hover:text-shsu-blue hover:bg-shsu-blue/5 rounded-md">募資計劃</a>
+                <a href="#merchandise" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-700 hover:text-shsu-blue hover:bg-shsu-blue/5 rounded-md">周邊</a>
+                <a href="#contact" class="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-700 hover:text-shsu-blue hover:bg-shsu-blue/5 rounded-md">聯絡我們</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section - 保持不變 -->
+        <section id="hero" class="bg-gradient-to-br from-shsu-blue to-shsu-blue-light py-20 sm:py-32">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-5xl sm:text-7xl font-extrabold text-white mb-4 leading-tight">
+                    用歌聲，彩繪世新生活
+                </h1>
+                <p class="text-xl sm:text-2xl text-shsu-orange font-semibold mb-8">
+                    加入世新合唱團，找到屬於你的和聲！
+                </p>
+                <!-- CTA Button -->
+                <a href="#about" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-shsu-blue bg-white hover:bg-gray-100 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-shsu-orange/50">
+                    了解更多我們的故事
+                </a>
+            </div>
+        </section>
+
+        <!-- 2. 關於我們 (About Us) - 維持白色背景 -->
+        <section id="about" class="py-16 sm:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- 標題 -->
+                <h2 class="text-4xl font-extrabold text-center text-shsu-blue mb-12 border-b-4 border-shsu-orange inline-block pb-1">
+                    About us (簡介)
+                </h2>
+                
+                <!-- 左右分欄布局，符合草圖的 Logo / 簡介 結構 -->
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    
+                    <!-- 左欄: 大型 Logo / 年度主視覺 區塊 -->
+                    <div class="bg-white rounded-xl shadow-2xl overflow-hidden aspect-[4/3] flex items-center justify-center p-0">
+                        <!-- ★★★★★ 替換照片網址：年度主視覺或團體照 (僅此一處) ★★★★★ -->
+                        <img 
+                            src="ass/img/1.jpg" 
+                            alt="世新合唱團年度主視覺：鏡中影外之聲，影外之心" 
+                            class="w-full h-full object-contain" 
+                            onerror="this.onerror=null;this.src='https://placehold.co/600x450/0C87D0/ffffff?text=年度主視覺+Logo';"
+                        >
+                    </div>
+
+                    <!-- 右欄: 簡介文字內容 -->
+                    <div class="space-y-6 pt-4">
+                        <h3 class="text-3xl font-bold text-shsu-blue border-b border-shsu-orange pb-2">
+                            簡介
+                        </h3>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            世新合唱團（SHUC）成立於 1990 年，是世新大學校園中一個充滿活力與溫暖的大家庭。我們不僅是練習唱歌的社團，更是聚集了一群對合唱藝術充滿熱情的夥伴。
+                        </p>
+                        <p class="text-lg font-semibold text-shsu-orange">
+                            無論你是否會看樂譜，只要你熱愛唱歌、渴望在舞台上發光發熱，這裡就是你展現自我的最佳舞台！
+                        </p>
+                        <ul class="space-y-3 text-gray-600 list-disc list-inside pl-4">
+                            <li><strong class="text-shsu-blue">專業指導</strong>：每週有專業指導老師帶領聲樂及合唱練習。</li>
+                            <li><strong class="text-shsu-blue">豐富舞台</strong>：每年固定舉辦成果發表會及參與校內外演出。</li>
+                            <li><strong class="text-shsu-blue">認識朋友</strong>：透過音樂交流，結識來自不同科系的知心好友。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 活動 (Activities) - 加入懸停圖片輪播效果 -->
+        <section id="activities" class="py-16 sm:py-24 bg-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl font-extrabold text-center text-shsu-blue mb-12 border-b-4 border-shsu-orange inline-block pb-1">
+                    精彩活動回顧
+                </h2>
+
+                <!-- 橫向滾動區塊容器 -->
+                <div class="relative flex items-center">
+                    
+                    <!-- 左箭頭 -->
+                    <button onclick="scrollCarousel(-1)" class="absolute left-0 z-10 p-3 bg-white rounded-full shadow-lg text-shsu-blue hover:bg-shsu-blue hover:text-white transition duration-200 transform -translate-x-1/2 focus:outline-none focus:ring-4 focus:ring-shsu-blue/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        <span class="sr-only">Previous</span>
+                    </button>
+
+                    <!-- 滾動內容 (加上 no-scrollbar 隱藏系統捲軸) -->
+                    <div id="activities-carousel" class="flex overflow-x-auto no-scrollbar snap-x snap-mandatory space-x-8 px-4 py-4 w-full">
+                        
+                        <!-- Activity Card 1: 日常練團與聚會 (加入懸停輪播事件) -->
+                        <div class="flex-shrink-0 w-80 snap-center bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300"
+                            id="card-1"
+                            onmouseover="startSlideshow('card-1')"
+                            onmouseout="stopSlideshow('card-1')">
+                            <div class="relative aspect-video">
+                                
+                                <!-- ★★★★★ 替換照片網址：年度 1 (卡片預設顯示) ★★★★★ -->
+                                <img id="img-card-1-0" 
+                                    src="ass/img/6.jpg" 
+                                    alt="練團日常照片 1" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100 z-10">
+                                
+                                <!-- ★★★★★ 替換照片網址：年度 2 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-1-1" 
+                                    src="ass/img/4.jpg" 
+                                    alt="練團日常照片 2" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+                                
+                                <!-- ★★★★★ 替換照片網址：年度 3 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-1-2" 
+                                    src="ass/img/5.jpg" 
+                                    alt="練團日常照片 3" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+
+                                <!-- ★★★★★ 替換照片網址：年度 3 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-1-2" 
+                                    src="ass/img/11.jpg" 
+                                    alt="練團日常照片 4" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+
+                                <!-- ★★★★★ 替換照片網址：年度 3 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-1-2" 
+                                    src="ass/img/12.jpg" 
+                                    alt="練團日常照片 5" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+
+                                <!-- ★★★★★ 替換照片網址：年度 3 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-1-2" 
+                                    src="ass/img/10.jpg" 
+                                    alt="練團日常照片 6" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-shsu-blue mb-2">年度公演</h3>
+                                <p class="text-sm text-gray-600">
+                                    每年七月，合唱團最大的舞台盛事。團員們將一年來的訓練成果，以最美好的歌聲呈獻給觀眾。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Activity Card 2: 寒訓 (加入懸停輪播事件) -->
+                        <div class="flex-shrink-0 w-80 snap-center bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300"
+                            id="card-2"
+                            onmouseover="startSlideshow('card-2')"
+                            onmouseout="stopSlideshow('card-2')">
+                            <div class="relative aspect-video">
+                                <!-- ★★★★★ 替換照片網址：成果發表會照片 1 (卡片預設顯示) ★★★★★ -->
+                                <img id="img-card-2-0" 
+                                    src="ass/img/3.jpg" 
+                                    alt="成果發表會照片 A" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100 z-10">
+                                
+                                <!-- ★★★★★ 替換照片網址：成果發表會照片 2 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-2-1" 
+                                    src="ass/img/7.jpg" 
+                                    alt="成果發表會照片 B" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+                                
+                                <!-- ★★★★★ 替換照片網址：成果發表會照片 3 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-2-2" 
+                                    src="https://placehold.co/600x350/FFC107/333333?text=發表會+C" 
+                                    alt="成果發表會照片 C" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-shsu-blue mb-2">寒假音樂訓練營</h3>
+                                <p class="text-sm text-gray-600">
+                                    每年五月，合唱團最大的舞台盛事。團員們將一年來的訓練成果，以最美好的歌聲呈獻給觀眾。
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Activity Card 3: 校內外大型演出 (加入懸停輪播事件) -->
+                        <div class="flex-shrink-0 w-80 snap-center bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300"
+                            id="card-3"
+                            onmouseover="startSlideshow('card-3')"
+                            onmouseout="stopSlideshow('card-3')">
+                            <div class="relative aspect-video">
+                                <!-- ★★★★★ 替換照片網址：校內外演出照片 1 (卡片預設顯示) ★★★★★ -->
+                                <img id="img-card-3-0" 
+                                    src="https://placehold.co/600x350/0C87D0/ffffff?text=大型演出+X" 
+                                    alt="大型演出照片 X" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-100 z-10">
+                                
+                                <!-- ★★★★★ 替換照片網址：校內外演出照片 2 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-3-1" 
+                                    src="https://placehold.co/600x350/80DEEA/333333?text=大型演出+Y" 
+                                    alt="大型演出照片 Y" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+                                
+                                <!-- ★★★★★ 替換照片網址：校內外演出照片 3 (滑鼠懸停輪播) ★★★★★ -->
+                                <img id="img-card-3-2" 
+                                    src="https://placehold.co/600x350/00BCD4/ffffff?text=大型演出+Z" 
+                                    alt="大型演出照片 Z" 
+                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 opacity-0">
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-shsu-blue mb-2">校內外大型演出</h3>
+                                <p class="text-sm text-gray-600">
+                                    參與校園音樂祭、跨校交流等活動，讓世新的歌聲被更多人聽見。
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- More Cards for scrolling effect: 靜態卡片 -->
+                        <div class="flex-shrink-0 w-80 snap-center bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300">
+                            <div class="aspect-video bg-shsu-orange/10 flex items-center justify-center">
+                                <p class="text-center text-xl text-gray-500 p-8">聲樂分部課</p>
+                            </div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-shsu-blue mb-2">聲樂分部課</h3><p class="text-sm text-gray-600">小班制聲樂指導，精進個人歌唱技巧。</p></div>
+                        </div>
+                        <!-- More Cards for scrolling effect: 靜態卡片 -->
+                        <div class="flex-shrink-0 w-80 snap-center bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-[1.02] transition duration-300">
+                            <div class="aspect-video bg-shsu-blue/10 flex items-center justify-center">
+                                <p class="text-center text-xl text-gray-500 p-8">迎新與送舊</p>
+                            </div>
+                            <div class="p-6"><h3 class="text-xl font-bold text-shsu-blue mb-2">迎新與送舊</h3><p class="text-sm text-gray-600">充滿歡笑與不捨的團員們重要時刻。</p></div>
+                        </div>
+                        
+                    </div>
+
+                    <!-- 右箭頭 -->
+                    <button onclick="scrollCarousel(1)" class="absolute right-0 z-10 p-3 bg-white rounded-full shadow-lg text-shsu-blue hover:bg-shsu-blue hover:text-white transition duration-200 transform translate-x-1/2 focus:outline-none focus:ring-4 focus:ring-shsu-blue/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        <span class="sr-only">Next</span>
+                    </button>
+                    
+                </div>
+                <!-- 提示使用者可滾動 -->
+                <p class="text-center text-gray-500 text-sm mt-6">← 左右滑動或點擊箭頭查看更多活動照片 →</p>
+            </div>
+        </section>
+
+        <!-- 4. 團刊 (Journal) - 保持不變 -->
+        <section id="journal" class="py-16 sm:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl font-extrabold text-center text-shsu-blue mb-12 border-b-4 border-shsu-orange inline-block pb-1">
+                    專屬團刊：《樂聲之家》
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <!-- Journal Cover Placeholder -->
+                    <div class="flex justify-center">
+                        <!-- ★★★★★ 替換照片網址：團刊封面照 (如果有的話) ★★★★★ -->
+                        <div class="w-2/3 md:w-full max-w-sm aspect-[3/4] bg-shsu-orange/20 rounded-lg shadow-2xl overflow-hidden p-6 border-8 border-shsu-orange flex flex-col justify-center items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-shsu-orange mb-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 12h4"/><path d="M10 16h4"/></svg>
+                            <p class="text-3xl font-extrabold text-shsu-orange">樂聲之家</p>
+                            <!-- 縮寫已更新為 SHUC -->
+                            <p class="text-lg text-shsu-orange/80 mt-2">SHUC Annual Journal</p>
+                            <p class="text-sm text-shsu-orange/60 mt-4">2024 / 第三十期</p>
+                        </div>
+                    </div>
+                    <!-- Text Content -->
+                    <div class="space-y-6">
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            《樂聲之家》是世新合唱團每年發行的專屬團刊，記錄了當屆團員的音樂生活、心路歷程、演出花絮，以及專業的樂理和聲樂知識分享。
+                        </p>
+                        <p class="text-lg font-semibold text-shsu-blue">
+                            它不僅是珍貴的紀念品，更是團員們傳承經驗、互相鼓勵的橋樑。電子版收錄了歷屆精華文章與樂曲賞析資源。
+                        </p>
+                        <a href="#" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-md text-white bg-shsu-blue hover:bg-shsu-blue-light transition duration-300 focus:outline-none focus:ring-4 focus:ring-shsu-blue/50">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 12h4"/><path d="M10 16h4"/></svg>
+                            查閱電子版團刊
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 募資計劃 (Fundraising) - 保持不變 -->
+        <section id="fundraising" class="py-16 sm:py-24 bg-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl font-extrabold text-center text-shsu-blue mb-12 border-b-4 border-shsu-orange inline-block pb-1">
+                    年度募資計劃：支持我們的歌聲
+                </h2>
+
+                <div class="bg-white rounded-xl shadow-2xl p-8 md:p-12">
+                    <div class="md:flex md:space-x-12">
+                        <div class="md:w-1/2 space-y-6">
+                            <p class="text-lg text-gray-700 leading-relaxed">
+                                為了讓每年的成果發表會能呈現更高水準，並為團員提供更優質的訓練資源（如專業指導費、樂譜採購、場地租借等），我們誠摯邀請校友與各界愛樂人士支持我們的募資計劃。
+                            </p>
+                            <p class="text-lg font-bold text-shsu-orange">
+                                您的每一分支持，都是我們繼續發光發熱的動力！
+                            </p>
+                            <ul class="space-y-2 text-gray-600">
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 text-shsu-blue"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                    <strong>目標：</strong> 達成 NTD 80,000 元
+                                </li>
+                                <li>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2 text-shsu-blue"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+                                    <strong>用途：</strong> 成果發表會場地及舞台費用 (60%)、專業師資聘用 (40%)
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 贊助意向連結按鈕 (取代原表單) -->
+                        <div class="md:w-1/2 mt-8 md:mt-0 p-6 bg-shsu-blue/10 rounded-lg border-l-4 border-shsu-blue flex flex-col justify-center items-center text-center">
+                            <h3 class="text-2xl font-bold text-shsu-blue mb-4">填寫贊助意向表單</h3>
+                            <p class="text-gray-700 mb-6">
+                                為了更完善地記錄您的寶貴支持，請點擊下方按鈕，連至外部表單填寫資訊。
+                            </p>
+                            <a href="#" target="_blank" class="w-full md:w-auto py-3 px-8 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-shsu-orange hover:bg-shsu-orange/90 focus:outline-none focus:ring-4 focus:ring-shsu-orange/50 transition duration-300 transform hover:scale-105">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M12 18v-6"/></svg>
+                                前往填寫意向表單
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 周邊 (Merchandise) - (原有的 6 個商品) -->
+        <section id="merchandise" class="py-16 sm:py-24 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-4xl font-extrabold text-center text-shsu-blue mb-12 border-b-4 border-shsu-orange inline-block pb-1">
+                    周邊商品與價目表
+                </h2>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                    
+                    <!-- Item 1: 團便服 -->
+                    <div class="flex flex-col bg-gray-50 rounded-xl shadow-lg overflow-hidden">
+                        <!-- ★★★★★ 替換照片網址：周邊商品 - 團便服 ★★★★★ -->
+                        <div class="aspect-square bg-shsu-blue/10 flex items-center justify-center">
+                            <!-- 請將此處的圖片佔位符替換為實際的團便服照片 -->
+                            <img src="https://placehold.co/300x300/0C87D0/ffffff?text=團便服照片" alt="紀念款團便服" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/0C87D0/ffffff?text=團便服照片';">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900">紀念款團便服</h3>
+                            <p class="text-sm text-gray-600">日常穿搭必備，展現合唱團的簡約風格。</p>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <p class="text-xl font-extrabold text-shsu-orange">NT$ 750</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 2: 飲料杯套 -->
+                    <div class="flex flex-col bg-gray-50 rounded-xl shadow-lg overflow-hidden">
+                        <!-- ★★★★★ 替換照片網址：周邊商品 - 飲料杯套 ★★★★★ -->
+                        <div class="aspect-square bg-shsu-orange/10 flex items-center justify-center">
+                            <!-- 請將此處的圖片佔位符替換為實際的飲料杯套照片 -->
+                            <img src="https://placehold.co/300x300/F3990E/ffffff?text=飲料杯套照片" alt="環保飲料杯套" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/F3990E/ffffff?text=飲料杯套照片';">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900">環保飲料杯套</h3>
+                            <p class="text-sm text-gray-600">實用環保小物，支持永續生活。</p>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <p class="text-xl font-extrabold text-shsu-orange">NT$ 120</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 3: 明信片 -->
+                    <div class="flex flex-col bg-gray-50 rounded-xl shadow-lg overflow-hidden">
+                        <!-- ★★★★★ 替換照片網址：周邊商品 - 明信片組 ★★★★★ -->
+                        <div class="aspect-square bg-shsu-blue/10 flex items-center justify-center">
+                            <!-- 請將此處的圖片佔位符替換為實際的明信片照片 -->
+                            <img src="https://placehold.co/300x300/0C87D0/ffffff?text=明信片照片" alt="典藏紀念明信片組" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/0C87D0/ffffff?text=明信片照片';">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900">典藏紀念明信片組</h3>
+                            <p class="text-sm text-gray-600">收錄歷年演出精選照片，一套五張。</p>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <p class="text-xl font-extrabold text-shsu-orange">NT$ 200</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Item 4: 鑰匙圈 -->
+                    <div class="flex flex-col bg-gray-50 rounded-xl shadow-lg overflow-hidden">
+                        <!-- ★★★★★ 替換照片網址：周邊商品 - 鑰匙圈 ★★★★★ -->
+                        <div class="aspect-square bg-shsu-orange/10 flex items-center justify-center">
+                            <!-- 請將此處的圖片佔位符替換為實際的鑰匙圈照片 -->
+                            <img src="https://placehold.co/300x300/F3990E/ffffff?text=鑰匙圈照片" alt="SHUC 造型鑰匙圈" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/F3990E/ffffff?text=鑰匙圈照片';">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900">SHUC 造型鑰匙圈</h3>
+                            <p class="text-sm text-gray-600">獨家 LOGO 設計，小巧可愛。</p>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <p class="text-xl font-extrabold text-shsu-orange">NT$ 100</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 5: T-Shirt (新) -->
+                    <div class="flex flex-col bg-gray-50 rounded-xl shadow-lg overflow-hidden">
+                        <!-- ★★★★★ 替換照片網址：周邊商品 - 黑色 T-Shirt ★★★★★ -->
+                        <div class="aspect-square bg-shsu-blue/10 flex items-center justify-center">
+                            <!-- 請將此處的圖片佔位符替換為實際的 T-Shirt 照片 -->
+                            <img src="https://placehold.co/300x300/0C87D0/ffffff?text=T-Shirt照片" alt="黑色簡約 T-Shirt" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/0C87D0/ffffff?text=T-Shirt照片';">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900">黑色簡約 T-Shirt</h3>
+                            <p class="text-sm text-gray-600">純棉材質，舒適百搭，胸前印有 SHUC 字樣。</p>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <p class="text-xl font-extrabold text-shsu-orange">NT$ 600</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 6: 徽章組 (新) -->
+                    <div class="flex flex-col bg-gray-50 rounded-xl shadow-lg overflow-hidden">
+                        <!-- ★★★★★ 替換照片網址：周邊商品 - 徽章組 ★★★★★ -->
+                        <div class="aspect-square bg-shsu-orange/10 flex items-center justify-center">
+                            <!-- 請將此處的圖片佔位符替換為實際的徽章組照片 -->
+                            <img src="https://placehold.co/300x300/F3990E/ffffff?text=徽章組照片" alt="合唱主題徽章組" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/300x300/F3990E/ffffff?text=徽章組照片';">
+                        </div>
+                        <div class="p-4 flex-grow">
+                            <h3 class="text-lg font-bold text-gray-900">合唱主題徽章組</h3>
+                            <p class="text-sm text-gray-600">音樂符號與樂器造型，一套三枚。</p>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <p class="text-xl font-extrabold text-shsu-orange">NT$ 150</p>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <div class="text-center mt-12">
+                    <p class="text-lg text-gray-600 mb-4">有興趣購買或預訂嗎？</p>
+                    <a href="#" class="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-lg text-white bg-shsu-blue hover:bg-shsu-blue-light transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-shsu-blue/50">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.72a2 2 0 0 0 2-1.58L23 6H6"/></svg>
+                        填寫周邊商品訂購單
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 7. 頁腳/聯絡我們 (Footer/Contact) - 保持不變 -->
+    <footer id="contact" class="bg-gray-800 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                
+                <!-- Col 1: Logo and Slogan -->
+                <div class="col-span-2 md:col-span-1 space-y-4">
+                    <h4 class="text-2xl font-extrabold text-shsu-orange">世新合唱團 SHUC</h4>
+                    <p class="text-gray-400 text-sm">用歌聲，彩繪世新生活。</p>
+                </div>
+
+                <!-- Col 2: Quick Links -->
+                <div>
+                    <h5 class="text-lg font-semibold mb-3 text-shsu-blue">快速連結</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition duration-200">關於我們</a></li>
+                        <li><a href="#activities" class="text-gray-400 hover:text-white transition duration-200">活動回顧</a></li>
+                        <li><a href="#journal" class="text-gray-400 hover:text-white transition duration-200">團刊資訊</a></li>
+                        <li><a href="#fundraising" class="text-gray-400 hover:text-white transition duration-200">募資計劃</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Contact Info -->
+                <div>
+                    <h5 class="text-lg font-semibold mb-3 text-shsu-blue">聯絡資訊</h5>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-shsu-orange"><path d="M22 16.92v3a2 2 0 0 1-2 2h-3.41l-1.42-1.42a2 2 0 0 0-2.83 0l-5 5-1.42-1.42a2 2 0 0 0 0-2.83l1.42-1.42V4a2 2 0 0 1 2-2h3.41a2 2 0 0 1 1.41.59l2.83 2.83a2 2 0 0 1 .59 1.41v3.41a2 2 0 0 1-.59 1.41l-2.83 2.83"/></svg>
+                            <span class="text-gray-400">世新合唱團 信箱：shsu.choir@gmail.com</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-shsu-orange"><path d="M20.5 4.5a2.5 2.5 0 0 1 0 5L12 12 3.5 9.5a2.5 2.5 0 0 1 0-5L12 2l8.5 2.5zM12 22.5V12M12 12l8.5-2.5M12 12l-8.5-2.5"/></svg>
+                            <span class="text-gray-400">練團地點：世新大學 R 棟琴房</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Social Media (已更新) -->
+                <div>
+                    <h5 class="text-lg font-semibold mb-3 text-shsu-blue">追蹤我們</h5>
+                    <div class="flex space-x-4">
+                        
+                        <!-- 1. YouTube (新) -->
+                        <a href="#" class="text-gray-400 hover:text-shsu-orange transition duration-200" aria-label="YouTube">
+                            <!-- YouTube Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                                <path d="M2.5 17a2.49 2.49 0 0 1-1.87-4.14A1.66 1.66 0 0 1 1 12.28V11.72c0-.44.13-.88.39-1.28a2.5 2.5 0 0 1 1.87-4.14h0a2.5 2.5 0 0 1 4.14 1.87c.4.26.84.39 1.28.39h5.82c.44 0 .88-.13 1.28-.39a2.5 2.5 0 0 1 4.14-1.87h0a2.5 2.5 0 0 1 1.87 4.14c-.26.4-.39.84-.39 1.28v.56c0 .44.13.88.39 1.28a2.5 2.5 0 0 1-1.87 4.14h0a2.5 2.5 0 0 1-4.14-1.87c-.4-.26-.84-.39-1.28-.39H9.41c-.44 0-.88.13-1.28.39a2.5 2.5 0 0 1-4.14 1.87H2.5z"/>
+                                <path d="m10 8 5 4-5 4V8z"/>
+                            </svg>
+                        </a>
+                        
+                        <!-- 2. Instagram (保持不變) -->
+                        <a href="#" class="text-gray-400 hover:text-shsu-orange transition duration-200" aria-label="Instagram">
+                            <!-- Instagram Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                        </a>
+
+                        <!-- 3. Threads (新) -->
+                        <a href="#" class="text-gray-400 hover:text-shsu-orange transition duration-200" aria-label="Threads">
+                            <!-- Threads Icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6">
+                                <path d="M7 8H3"/>
+                                <path d="M10 12H3"/>
+                                <path d="M3 16h5c.78 0 1.2.22 1.44.43.34.3.56.74.63 1.27.18 1.45-1.54 2.1-2.07 1.8-1.57-.89-2.48-3.04-1.12-5.71s3.75-4.49 5.32-3.6c.9.52 1.35 1.4 1.35 2.37"/>
+                                <path d="M16 16h-5c-.78 0-1.2-.22-1.44-.43-.34-.3-.56-.74-.63-1.27-.18-1.45 1.54-2.1 2.07-1.8 1.57.89 2.48 3.04 1.12 5.71s-3.75 4.49-5.32 3.6c-.9-.52-1.35-1.4-1.35-2.37"/>
+                            </svg>
+                        </a>
+
+                    </div>
+                    <p class="text-gray-500 text-xs mt-4">請替換成您的社群網址</p>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="mt-12 border-t border-gray-700 pt-6 text-center">
+                <p class="text-sm text-gray-400">&copy; 2024 世新合唱團. All rights reserved. 版權所有，盜版必究。</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
